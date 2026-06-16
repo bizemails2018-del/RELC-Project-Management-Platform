@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RISE Residential — Project Management</title>
+<style>
+  :root {
+    --navy: #0d3a52;
+    --navy-light: #1a5070;
+    --navy-mid: #144560;
+    --teal: #1e8a9e;
+    --teal-light: #2aafc6;
+    --accent: #e8a020;
+    --accent-light: #f0b840;
+    --red: #c0392b;
+    --red-light: #e74c3c;
+    --green: #27ae60;
+    --green-light: #2ecc71;
+    --yellow: #f39c12;
+    --bg: #08263a;
+    --surface: #0f3347;
+    --surface2: #163d55;
+    --surface3: #1c4a65;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8f4f8;
+    --text-muted: #8ab4c4;
+    --text-dim: #5a8a9a;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+  /* Layout */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background: var(--navy);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo .logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--teal-light);
+    letter-spacing: 1px;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+  .sidebar-nav { padding: 16px 8px; flex: 1; }
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 12px 4px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text); }
+  .nav-item.active { background: var(--teal); color: #fff; font-weight: 600; }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+  /* Main content */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  .btn {
+    padding: 7px 16px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--teal); color: #fff; }
+  .btn-primary:hover { background: var(--teal-light); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { background: var(--red-light); }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-accent:hover { background: var(--accent-light); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  .content { flex: 1; overflow-y: auto; padding: 28px; }
+
+  /* Pages */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  /* Stats row */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat-card.blue::before { background: var(--teal-light); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-value { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .stat-card.blue .stat-value { color: var(--teal-light); }
+  .stat-card.green .stat-value { color: var(--green-light); }
+  .stat-card.yellow .stat-value { color: var(--accent-light); }
+  .stat-card.red .stat-value { color: var(--red-light); }
+  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  /* Progress bars */
+  .progress-bar {
+    background: var(--surface2);
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+  }
+  .progress-fill.green { background: var(--green); }
+  .progress-fill.yellow { background: var(--yellow); }
+  .progress-fill.red { background: var(--red); }
+  .progress-fill.teal { background: var(--teal-light); }
+
+  /* Lane cards */
+  .lane-list { display: flex; flex-direction: column; gap: 12px; }
+  .lane-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .lane-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .lane-header:hover { background: var(--surface2); }
+  .lane-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--teal-light);
+    background: rgba(30,138,158,0.15);
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .lane-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .lane-owner { font-size: 12px; color: var(--text-muted); }
+  .lane-pct { font-size: 14px; font-weight: 700; width: 40px; text-align: right; }
+  .lane-mini-bar { width: 100px; }
+  .lane-chevron { color: var(--text-dim); font-size: 12px; transition: transform 0.2s; }
+  .lane-card.open .lane-chevron { transform: rotate(90deg); }
+
+  .lane-body { display: none; padding: 0 20px 16px; }
+  .lane-card.open .lane-body { display: block; }
+
+  .lane-phase-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 12px 0 8px;
+    padding-left: 4px;
+    border-left: 2px solid var(--teal);
+    padding-left: 8px;
+  }
+
+  /* Task items */
+  .task-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .task-header { display: flex; align-items: flex-start; gap: 10px; }
+  .task-status-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.15s;
+  }
+  .task-status-btn.done { background: var(--green); border-color: var(--green); color: #fff; }
+  .task-status-btn.progress { background: var(--yellow); border-color: var(--yellow); color: #fff; }
+  .task-status-btn.risk { background: var(--red); border-color: var(--red); color: #fff; }
+  .task-title { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.4; }
+  .task-title.done-text { text-decoration: line-through; color: var(--text-muted); }
+  .task-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; padding-left: 28px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .tag-owner { background: rgba(30,138,158,0.2); color: var(--teal-light); }
+  .tag-deadline { background: rgba(243,156,18,0.15); color: var(--accent-light); }
+  .tag-risk { background: rgba(192,57,43,0.2); color: #e74c3c; }
+  .tag-progress { background: rgba(243,156,18,0.2); color: var(--accent-light); }
+  .tag-done { background: rgba(39,174,96,0.2); color: var(--green-light); }
+
+  .subtask-list { margin-top: 8px; padding-left: 28px; }
+  .subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+  .subtask-check {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    transition: all 0.15s;
+  }
+  .subtask-check.done { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .add-task-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    align-items: center;
+  }
+  .add-task-row input, .add-task-row select {
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 7px 10px;
+    font-size: 13px;
+    outline: none;
+  }
+  .add-task-row input { flex: 1; }
+  .add-task-row input::placeholder { color: var(--text-dim); }
+  .add-task-row select { cursor: pointer; }
+  .add-task-row select option { background: var(--surface); }
+
+  /* Decisions table */
+  .decisions-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .decisions-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .decisions-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .decisions-table tr:last-child td { border-bottom: none; }
+  .urgency-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .urgency-critical { background: rgba(192,57,43,0.2); color: #e74c3c; }
+  .urgency-major { background: rgba(243,156,18,0.15); color: var(--accent-light); }
+
+  /* Risk items */
+  .risk-list { display: flex; flex-direction: column; gap: 10px; }
+  .risk-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+  .risk-item.major { border-left-color: var(--yellow); }
+  .risk-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .risk-id { font-size: 11px; font-weight: 700; color: var(--text-dim); }
+  .risk-title { font-size: 13px; font-weight: 600; flex: 1; }
+  .risk-meta { font-size: 12px; color: var(--text-muted); }
+
+  /* Meetings page */
+  .meeting-list { display: flex; flex-direction: column; gap: 14px; }
+  .meeting-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .meeting-card-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .meeting-card-header:hover { background: var(--surface2); }
+  .meeting-date {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--teal-light);
+    background: rgba(30,138,158,0.12);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+  }
+  .meeting-title { font-size: 14px; font-weight: 600; flex: 1; }
+  .meeting-attendees { font-size: 12px; color: var(--text-muted); }
+  .meeting-body { display: none; padding: 16px 18px; border-top: 1px solid var(--border); }
+  .meeting-card.open .meeting-body { display: block; }
+  .meeting-section { margin-bottom: 14px; }
+  .meeting-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .meeting-section p { font-size: 13px; line-height: 1.6; color: var(--text-muted); }
+  .meeting-ai-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+  .ai-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    width: 560px;
+    max-width: 95vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+  }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 10px 12px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--teal); }
+  .form-input::placeholder { color: var(--text-dim); }
+  .form-input option { background: var(--surface); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+  /* Calendar */
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; }
+  .cal-header {
+    background: var(--surface2);
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .cal-cell {
+    background: var(--surface);
+    min-height: 100px;
+    padding: 8px;
+    position: relative;
+  }
+  .cal-cell.other-month { background: var(--bg); opacity: 0.5; }
+  .cal-cell.today { background: rgba(30,138,158,0.1); }
+  .cal-day { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+  .cal-cell.today .cal-day { color: var(--teal-light); font-weight: 800; }
+  .cal-event {
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+  .cal-event.red { background: rgba(192,57,43,0.3); color: #e74c3c; }
+  .cal-event.yellow { background: rgba(243,156,18,0.2); color: var(--accent-light); }
+  .cal-event.teal { background: rgba(30,138,158,0.25); color: var(--teal-light); }
+  .cal-event.green { background: rgba(39,174,96,0.2); color: var(--green-light); }
+
+  .calendar-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .calendar-nav .month-title { font-size: 18px; font-weight: 700; flex: 1; }
+
+  /* Chat */
+  .chat-layout { display: flex; gap: 20px; height: calc(100vh - 140px); }
+  .chat-sidebar {
+    width: 220px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .chat-sidebar-title { font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+  .channel-item {
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .channel-item:hover { background: var(--surface2); color: var(--text); }
+  .channel-item.active { background: var(--teal); color: #fff; font-weight: 600; }
+  .channel-hash { opacity: 0.6; font-size: 15px; }
+
+  .chat-main { flex: 1; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .chat-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .chat-message { display: flex; gap: 10px; }
+  .chat-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--navy-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal-light);
+    flex-shrink: 0;
+  }
+  .chat-msg-content { flex: 1; }
+  .chat-msg-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px; }
+  .chat-msg-name { font-size: 13px; font-weight: 700; }
+  .chat-msg-time { font-size: 11px; color: var(--text-dim); }
+  .chat-msg-text { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+  .chat-input-area { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+  .chat-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 10px 14px;
+    font-size: 13px;
+    outline: none;
+  }
+  .chat-input:focus { border-color: var(--teal); }
+  .chat-input::placeholder { color: var(--text-dim); }
+
+  /* Phase timeline */
+  .phase-timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .phase-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .phase-card.complete::after { background: var(--green); }
+  .phase-card.active::after { background: var(--yellow); }
+  .phase-card.upcoming::after { background: var(--text-dim); }
+  .phase-label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .phase-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .phase-dates { font-size: 12px; color: var(--text-muted); }
+  .phase-status { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .phase-status.complete { background: rgba(39,174,96,0.15); color: var(--green-light); }
+  .phase-status.active { background: rgba(243,156,18,0.15); color: var(--accent-light); }
+  .phase-status.upcoming { background: rgba(90,138,154,0.15); color: var(--text-dim); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 10px; }
+
+  /* Section headers */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 700; }
+  .section-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+  .mb8 { margin-bottom: 8px; }
+  .mb16 { margin-bottom: 16px; }
+  .mb24 { margin-bottom: 24px; }
+
+  .inline-edit { display: none; }
+  .inline-form { display: flex; gap: 6px; align-items: center; }
+
+  textarea.form-input { min-height: 80px; resize: vertical; font-family: inherit; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .badge-teal { background: rgba(30,138,158,0.2); color: var(--teal-light); }
+  .badge-green { background: rgba(39,174,96,0.15); color: var(--green-light); }
+  .badge-yellow { background: rgba(243,156,18,0.15); color: var(--accent-light); }
+  .badge-red { background: rgba(192,57,43,0.2); color: #e74c3c; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 40px; color: var(--text-dim); }
+  .empty-state .empty-icon { font-size: 32px; margin-bottom: 10px; }
+  .empty-state p { font-size: 13px; }
+
+  /* Tooltip-like note */
+  .note-box {
+    background: rgba(30,138,158,0.08);
+    border: 1px solid rgba(30,138,158,0.2);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .phase-timeline { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">RISE</div>
+      <div class="logo-sub">Project Management</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item active" onclick="navTo('dashboard', this)">
+        <span class="icon">🏠</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="navTo('lanes', this)">
+        <span class="icon">🛤</span> Lanes
+      </div>
+      <div class="nav-section-label" style="margin-top:12px">Team</div>
+      <div class="nav-item" onclick="navTo('meetings', this)">
+        <span class="icon">📋</span> Meetings
+      </div>
+      <div class="nav-item" onclick="navTo('calendar', this)">
+        <span class="icon">📅</span> Calendar
+      </div>
+      <div class="nav-item" onclick="navTo('chat', this)">
+        <span class="icon">💬</span> Team Chat
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="pageTitle">Dashboard</div>
+      <div class="topbar-right">
+        <span style="font-size:12px;color:var(--text-dim)">Q2 2026 · 0–90 Day Sprint</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD PAGE -->
+      <div id="page-dashboard" class="page active">
+        <div class="stats-grid" id="dashStats"></div>
+
+        <div class="phase-timeline" id="phaseTimeline"></div>
+
+        <div class="grid-2 mb24">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Lane Progress</div>
+            </div>
+            <div id="laneProgressList"></div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Decisions Required</div>
+            </div>
+            <div id="dashDecisions"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">Active Risks</div>
+          </div>
+          <div class="risk-list" id="dashRisks"></div>
+        </div>
+      </div>
+
+      <!-- LANES PAGE -->
+      <div id="page-lanes" class="page">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Strategic Lanes</div>
+            <div class="section-sub">8 lanes · Q2 2026 · Click to expand projects and tasks</div>
+          </div>
+          <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add Task</button>
+        </div>
+        <div class="lane-list" id="laneList"></div>
+      </div>
+
+      <!-- MEETINGS PAGE -->
+      <div id="page-meetings" class="page">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Meeting Records</div>
+            <div class="section-sub">Log decisions, action items, and notes from team meetings</div>
+          </div>
+          <button class="btn btn-primary" onclick="openMeetingModal()">+ Log Meeting</button>
+        </div>
+        <div class="meeting-list" id="meetingList"></div>
+      </div>
+
+      <!-- CALENDAR PAGE -->
+      <div id="page-calendar" class="page">
+        <div class="calendar-nav">
+          <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">← Prev</button>
+          <div class="month-title" id="calMonthTitle"></div>
+          <button class="btn btn-ghost btn-sm" onclick="calNav(1)">Next →</button>
+          <button class="btn btn-ghost btn-sm" onclick="calGoToday()">Today</button>
+        </div>
+        <div class="note-box">📅 Deadlines from tasks in all lanes auto-populate this calendar. Add tasks with deadlines in the <strong>Lanes</strong> tab to see them here.</div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <!-- CHAT PAGE -->
+      <div id="page-chat" class="page">
+        <div class="chat-layout">
+          <div class="chat-sidebar">
+            <div class="chat-sidebar-title">Channels</div>
+            <div id="channelList"></div>
+            <hr class="divider">
+            <button class="btn btn-ghost btn-sm" style="width:100%" onclick="addChannel()">+ Add Channel</button>
+          </div>
+          <div class="chat-main">
+            <div class="chat-header">
+              <span style="color:var(--text-dim)">#</span>
+              <span id="activeChannelName">general</span>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+              <input class="chat-input" id="chatInput" placeholder="Message #general..." onkeydown="handleChatKey(event)">
+              <button class="btn btn-primary" onclick="sendChat()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-title">Add Task</div>
+    <div class="form-group">
+      <label class="form-label">Task Title *</label>
+      <input class="form-input" id="taskTitle" placeholder="What needs to be done?">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Lane</label>
+        <select class="form-input" id="taskLane"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="taskStatusSelect">
+          <option value="pending">Pending</option>
+          <option value="progress">In Progress</option>
+          <option value="done">Done</option>
+          <option value="risk">At Risk</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Owner</label>
+        <select class="form-input" id="taskOwner">
+          <option value="">Unassigned</option>
+          <option>Jac</option>
+          <option>Lucas</option>
+          <option>Jackie</option>
+          <option>Ben</option>
+          <option>Fania</option>
+          <option>Brett</option>
+          <option>Mona</option>
+          <option>Emily</option>
+          <option>Courtney</option>
+          <option>Tea</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deadline</label>
+        <input class="form-input" id="taskDeadline" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="taskNotes" placeholder="Additional context..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('taskModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Meeting Modal -->
+<div class="modal-overlay" id="meetingModal">
+  <div class="modal">
+    <div class="modal-title">Log Meeting</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Meeting Title *</label>
+        <input class="form-input" id="meetingTitle" placeholder="e.g. ELC Biweekly Sync">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input class="form-input" id="meetingDate" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Attendees</label>
+      <input class="form-input" id="meetingAttendees" placeholder="e.g. Courtney, Jac, Lucas, Mona...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Summary / Notes</label>
+      <textarea class="form-input" id="meetingSummary" placeholder="What was discussed?"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Decisions Made</label>
+      <textarea class="form-input" id="meetingDecisions" placeholder="List key decisions (one per line)"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Action Items</label>
+      <textarea class="form-input" id="meetingActions" placeholder="Action items (one per line, e.g. 'Jac: publish leasing baseline by 6/24')"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('meetingModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMeeting()">Save Meeting</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+
+const DEFAULT_LANES = [
+  {
+    id: 'lane01', num: '01', name: 'Leasing Performance', owner: 'Jac', pct: 62,
+    tasks: [
+      { id: 't01a', title: 'CRM migrated from Knock to Entrata (all properties)', status: 'done', owner: 'Jac', deadline: '2026-05-14', notes: 'Phase 1 complete', subtasks: [] },
+      { id: 't01b', title: 'Leasing contest launched with defined rules and validated KPIs', status: 'done', owner: 'Jac', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't01c', title: 'Publish leasing baseline — 180 apps / 131 approved April', status: 'risk', owner: 'Jac', deadline: '2026-06-24', notes: 'Contest has been live since May 14 with NO published target. Critical gap.', subtasks: [] },
+      { id: 't01d', title: 'DLR automation full deployment across 17+ properties', status: 'progress', owner: 'Jac', deadline: '2026-07-14', notes: 'Currently at 70%', subtasks: [
+        { id: 's01d1', text: 'Complete automation at remaining properties', done: false },
+        { id: 's01d2', text: 'Validate automation rules per property', done: false }
+      ]},
+      { id: 't01e', title: '"Not progressing" leads cleared from dashboard', status: 'risk', owner: 'Jac', deadline: '2026-06-24', notes: '0% progress — site teams not clearing stalled leads', subtasks: [] },
+      { id: 't01f', title: 'Full funnel leasing report delivered to ELC', status: 'pending', owner: 'Jac', deadline: '2026-07-14', notes: '', subtasks: [] },
+    ]
+  },
+  {
+    id: 'lane02', num: '02', name: 'Entrata Optimization', owner: 'Lucas', pct: 48,
+    tasks: [
+      { id: 't02a', title: 'Entrata diagnostic complete', status: 'done', owner: 'Lucas', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't02b', title: 'FMO revised, voucher field removed', status: 'done', owner: 'Lucas', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't02c', title: 'Lock Entrata report filters + assign named data steward', status: 'risk', owner: 'Lucas', deadline: '2026-06-24', notes: 'Library access restricted June 1 but filters NOT standardized. Phase 3 gate blocker.', subtasks: [] },
+      { id: 't02d', title: 'Entrata platform decision: chunk modules vs. full lead-to-lease', status: 'risk', owner: 'ELC + Courtney', deadline: '2026-06-24', notes: 'CRITICAL decision. Budget window: student August, conventional October. Lucas: 2-3 years behind.', subtasks: [
+        { id: 's02d1', text: 'Jac/Ben: get Entrata renewal price via $30K dispute', done: false },
+        { id: 's02d2', text: 'Lucas: deliver one-page Option A vs B decision memo', done: false },
+        { id: 's02d3', text: 'ELC decides at next meeting — no re-opening', done: false }
+      ]},
+      { id: 't02e', title: 'Vetting of 5 leasing-lifecycle AI agents', status: 'pending', owner: 'Ben', deadline: '2026-07-14', notes: 'Specific agents not yet named', subtasks: [] },
+      { id: 't02f', title: 'All KPIs trusted + clean for Phase 3 reporting', status: 'pending', owner: 'Lucas', deadline: '2026-07-14', notes: '', subtasks: [] },
+    ]
+  },
+  {
+    id: 'lane03', num: '03', name: 'Application & Screening', owner: 'Lucas / Jackie', pct: 52,
+    tasks: [
+      { id: 't03a', title: 'Vendor selected: Resident Verify / Income IQ', status: 'done', owner: 'Lucas', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't03b', title: 'End-to-end application/screening process map complete', status: 'done', owner: 'Jackie', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't03c', title: 'Income IQ contract signed and go-live', status: 'progress', owner: 'Lucas', deadline: '2026-07-14', notes: 'Contract starting now', subtasks: [
+        { id: 's03c1', text: 'Complete contract negotiation', done: false },
+        { id: 's03c2', text: 'Old vendors off-boarded', done: false },
+        { id: 's03c3', text: 'Income IQ live', done: false }
+      ]},
+      { id: 't03d', title: 'Baymeadows Entrata pilot launch (lead-to-lease)', status: 'progress', owner: 'Jackie', deadline: '2026-07-14', notes: 'Selected as pilot property', subtasks: [] },
+      { id: 't03e', title: 'FL security deposit statute — portfolio-wide remediation', status: 'risk', owner: 'Jackie + Courtney', deadline: '2026-06-24', notes: 'CRITICAL. Class-action exposure. Baymeadows piloting. Full portfolio NOT authorized. Courtney must authorize.', subtasks: [] },
+      { id: 't03f', title: 'Entrata do-not-rent watch list: legal review before activation', status: 'risk', owner: 'Emily + ELC', deadline: '2026-06-24', notes: 'Fair-housing exposure named explicitly at June 10 meeting. DO NOT activate without counsel.', subtasks: [] },
+    ]
+  },
+  {
+    id: 'lane04', num: '04', name: 'Marketing & Web', owner: 'Fania / Lucas', pct: 28,
+    tasks: [
+      { id: 't04a', title: 'Website migration sequence approved', status: 'done', owner: 'Fania', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't04b', title: 'Property website migrations (1/month cadence)', status: 'progress', owner: 'Fania', deadline: '2026-12-31', notes: 'On schedule. Year-end completion target. 1 site per month.', subtasks: [
+        { id: 's04b1', text: 'Complete month 1 migration', done: true },
+        { id: 's04b2', text: 'Complete month 2 migration', done: false },
+        { id: 's04b3', text: 'At least 2 properties fully migrated by Jul 14', done: false }
+      ]},
+    ]
+  },
+  {
+    id: 'lane05', num: '05', name: 'Revenue Management', owner: 'Jac', pct: 35,
+    tasks: [
+      { id: 't05a', title: 'AIRM verified, unit premiums set', status: 'done', owner: 'Jac', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't05b', title: 'Renewal bonus rollout (testing at Sereno)', status: 'progress', owner: 'Jac', deadline: '2026-07-14', notes: 'At 50% rollout. Results not yet reported.', subtasks: [] },
+      { id: 't05c', title: 'RM platform research and decision', status: 'risk', owner: 'Jac', deadline: '2026-07-14', notes: 'Not yet started. Jac is at critical capacity.', subtasks: [] },
+      { id: 't05d', title: 'Renewal bonus thresholds documented and live', status: 'pending', owner: 'Jac', deadline: '2026-07-14', notes: '', subtasks: [] },
+    ]
+  },
+  {
+    id: 'lane06', num: '06', name: 'Talent & Leadership Dev', owner: 'Mona / Brett', pct: 38,
+    tasks: [
+      { id: 't06a', title: 'June JAX workshop scheduled and confirmed', status: 'progress', owner: 'Mona + Brett + Fania', deadline: '2026-06-30', notes: 'Scheduled. Confirm agenda.', subtasks: [
+        { id: 's06a1', text: 'Confirm venue and logistics', done: true },
+        { id: 's06a2', text: 'Finalize agenda', done: false },
+        { id: 's06a3', text: 'Execute workshop', done: false }
+      ]},
+      { id: 't06b', title: 'Mentor program Cohort 1 launched', status: 'progress', owner: 'Mona', deadline: '2026-07-14', notes: 'At 40%', subtasks: [] },
+      { id: 't06c', title: 'Retention report and cadence set', status: 'risk', owner: 'Mona', deadline: '2026-07-14', notes: 'Not yet started.', subtasks: [] },
+    ]
+  },
+  {
+    id: 'lane07', num: '07', name: 'Culture / Employee Experience', owner: 'Brett / Mona', pct: 16,
+    tasks: [
+      { id: 't07a', title: 'ELC exec meetings on Amazing Workplace survey results', status: 'done', owner: 'Brett', deadline: '2026-06-14', notes: 'Complete', subtasks: [] },
+      { id: 't07b', title: 'Culture survey results delivered to all RISE', status: 'progress', owner: 'Brett + Mona', deadline: '2026-06-21', notes: 'Rolling out results next week. Plans for top 3 mandates.', subtasks: [] },
+      { id: 't07c', title: 'Survey action plan Phases 2–4 deployed', status: 'pending', owner: 'Brett + Mona', deadline: '2026-07-14', notes: 'All phases say June — needs phasing out or won\'t land.', subtasks: [
+        { id: 's07c1', text: 'Phase 2: deploy', done: false },
+        { id: 's07c2', text: 'Phase 3: deploy', done: false },
+        { id: 's07c3', text: 'Phase 4: deploy', done: false }
+      ]},
+      { id: 't07d', title: 'Q3 eNPS baseline set', status: 'pending', owner: 'Brett', deadline: '2026-07-14', notes: '', subtasks: [] },
+    ]
+  },
+  {
+    id: 'lane08', num: '08', name: 'Tools / Technology / Moonrise', owner: 'Ben', pct: 60,
+    tasks: [
+      { id: 't08a', title: 'Moonrise platform live', status: 'done', owner: 'Ben', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't08b', title: 'Recognition widget complete', status: 'done', owner: 'Ben', deadline: '2026-05-14', notes: '', subtasks: [] },
+      { id: 't08c', title: 'Policy upload bug fix', status: 'risk', owner: 'Ben', deadline: '2026-06-24', notes: 'Still open. Blocker.', subtasks: [] },
+      { id: 't08d', title: 'Bonus/performance dashboard build and test', status: 'progress', owner: 'Mona + Ben', deadline: '2026-07-01', notes: 'Mona testing this month. Goal: use for Q2 bonuses. Courtney approval needed.', subtasks: [
+        { id: 's08d1', text: 'Jac sends dashboard metrics to Ben', done: false },
+        { id: 's08d2', text: 'Mona tests dashboard', done: false },
+        { id: 's08d3', text: 'Courtney approves', done: false }
+      ]},
+      { id: 't08e', title: 'IT governance final (currently at 75%)', status: 'progress', owner: 'Ben', deadline: '2026-07-14', notes: '', subtasks: [] },
+      { id: 't08f', title: 'Hire dates entered into Moonrise', status: 'pending', owner: 'Ben', deadline: '2026-07-14', notes: '', subtasks: [] },
+    ]
+  },
+];
+
+const DEFAULT_MEETINGS = [
+  {
+    id: 'm001',
+    title: 'ELC Biweekly Sync — June 10',
+    date: '2026-06-10',
+    attendees: 'Courtney, Jac, Lucas, Ben, Jackie, Brett, Mona',
+    summary: 'First meeting on new biweekly cadence. Two major issues surfaced: (1) task tracker not working — not being updated regularly, team can\'t show accomplishments; (2) strategic fork on Entrata — chunk modules or commit to full lead-to-lease platform.',
+    decisions: [
+      'Build a progress dashboard to replace Excel list',
+      'Baymeadows selected as Entrata lead-to-lease pilot property',
+      'Entrata library access to be restricted to Operations team (FMO enforced)',
+      'Biweekly ELC sync cadence confirmed going forward'
+    ],
+    actions: [
+      'Jac + Ben: Get Entrata renewal price via $30K dispute thread (by 6/24)',
+      'Lucas: Deliver one-page Option A vs B platform decision memo (by next ELC)',
+      'Emily + ELC: Legal review of do-not-rent watch list before any activation',
+      'Jac: Publish leasing baseline ASAP — overdue',
+      'Brett + Mona: Phase culture survey rollout — Phases 2-4 cannot all launch simultaneously'
+    ]
+  }
+];
+
+const DEFAULT_CHANNELS = [
+  { id: 'ch-general', name: 'general' },
+  { id: 'ch-elc', name: 'elc-leadership' },
+  { id: 'ch-entrata', name: 'entrata-decision' },
+  { id: 'ch-leasing', name: 'leasing-performance' },
+];
+
+const DEFAULT_MESSAGES = {
+  'ch-general': [
+    { id: 'msg1', sender: 'Mona', text: 'Welcome to the RISE Project Management platform! Use the Lanes tab to track progress, log meetings in the Meetings tab, and check deadlines in Calendar.', time: '2026-06-14 09:00' },
+  ],
+  'ch-elc': [
+    { id: 'msg2', sender: 'Courtney', text: 'Reminder: Entrata platform decision must be made at our next ELC meeting on 6/24. Come prepared.', time: '2026-06-14 10:30' },
+    { id: 'msg3', sender: 'Jac', text: 'Threading the renewal price ask into the $30K dispute with Entrata now. Will have a number before 6/24.', time: '2026-06-14 11:00' },
+  ],
+  'ch-entrata': [
+    { id: 'msg4', sender: 'Lucas', text: 'We are 2-3 years behind on Entrata upgrades. OXP, AI agents, autonomous leasing, OpenAI partnership — they are moving fast. We need to decide: chunk or full platform. I will have the one-pager ready before 6/24.', time: '2026-06-10 14:00' },
+  ],
+  'ch-leasing': [
+    { id: 'msg5', sender: 'Jac', text: 'Contest has been live since May 14. Working on formalizing the baseline — 180 apps / 131 approved in April (excluding student). Will publish by end of week.', time: '2026-06-14 13:00' },
+  ]
+};
+
+// ==================== STATE ====================
+
+let state = {
+  lanes: [],
+  meetings: [],
+  channels: [],
+  messages: {},
+  activeChannel: 'ch-general',
+  chatUser: 'You',
+};
+
+function loadState() {
+  const saved = localStorage.getItem('rise_pm_state');
+  if (saved) {
+    try {
+      state = JSON.parse(saved);
+    } catch(e) {
+      resetState();
+    }
+  } else {
+    resetState();
+  }
+}
+
+function resetState() {
+  state = {
+    lanes: JSON.parse(JSON.stringify(DEFAULT_LANES)),
+    meetings: JSON.parse(JSON.stringify(DEFAULT_MEETINGS)),
+    channels: JSON.parse(JSON.stringify(DEFAULT_CHANNELS)),
+    messages: JSON.parse(JSON.stringify(DEFAULT_MESSAGES)),
+    activeChannel: 'ch-general',
+    chatUser: 'You',
+  };
+  saveState();
+}
+
+function saveState() {
+  localStorage.setItem('rise_pm_state', JSON.stringify(state));
+}
+
+// ==================== NAVIGATION ====================
+
+function navTo(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = { dashboard: 'Dashboard', lanes: 'Strategic Lanes', meetings: 'Meeting Records', calendar: 'Calendar', chat: 'Team Chat' };
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'lanes') renderLanes();
+  if (page === 'meetings') renderMeetings();
+  if (page === 'calendar') renderCalendar();
+  if (page === 'chat') renderChat();
+}
+
+// ==================== DASHBOARD ====================
+
+const RISKS = [
+  { id: 'R-01', title: 'Entrata Platform Decision Stall', severity: 'critical', owner: 'ELC + Courtney', by: 'Next ELC meeting', context: 'Chunk vs. full lead-to-lease debate has run across multiple meetings without a decision. Budget window closes August (student) and October (conventional).' },
+  { id: 'R-02', title: 'Entrata Renewal Price Unknown', severity: 'critical', owner: 'Jac + Ben', by: 'Before 6/24 ELC', context: 'RISE locked at old rate. Lucas expects sticker shock. Price determines if full platform is financially viable.' },
+  { id: 'R-03', title: 'Fair-Housing Exposure on Watch List', severity: 'critical', owner: 'Emily + ELC', by: 'Before activation', context: 'Do-not-rent watch list approved to investigate. Fair-housing exposure named explicitly June 10. No activation before legal review.' },
+  { id: 'R-04', title: 'Florida Security Deposit Statute', severity: 'critical', owner: 'Jackie + Courtney', by: 'Now — overdue', context: 'Baymeadows piloting. Full portfolio NOT authorized. Class-action exposure continues to compound on all FL properties.' },
+  { id: 'R-05', title: 'No Published Leasing Baseline', severity: 'critical', owner: 'Jac + Courtney', by: 'Now — overdue', context: 'Contest live since May 14. No formal goals published. Site teams competing with no target.' },
+  { id: 'R-07', title: 'Automated Screening Gap', severity: 'major', owner: 'Lucas + Jackie', by: 'Before automation expansion', context: 'Previously-evicted applicant re-accepted because eviction never filed/appeared on credit. Watch list is proposed fix — not yet active.' },
+  { id: 'R-08', title: 'Entrata Data Integrity', severity: 'major', owner: 'Lucas', by: 'June 14 — Phase 3 gate', context: 'Report filters not standardized or locked. Every Phase 3 accountability conversation will include a debate about which numbers are right.' },
+];
+
+const DECISIONS = [
+  { text: 'Get Entrata renewal price before platform debate', owner: 'Jac + Ben', deadline: '6/24', urgency: 'critical' },
+  { text: 'Chunk Entrata modules vs. commit to full lead-to-lease platform', owner: 'ELC + Courtney', deadline: 'Next ELC', urgency: 'critical' },
+  { text: 'Authorize legal review of Entrata do-not-rent watch list', owner: 'Emily + ELC', deadline: 'Before activation', urgency: 'critical' },
+  { text: 'Authorize Jac to publish leasing goals and performance baseline', owner: 'Jac + Courtney', deadline: 'Overdue — now', urgency: 'critical' },
+  { text: 'ELC sequencing: Lucas/Ben Q2 priorities across Lanes 2, 3, 4, 8', owner: 'ELC', deadline: 'This week', urgency: 'major' },
+  { text: 'Approve full vendor contract audit and governance policy', owner: 'Jac + Courtney', deadline: '6/28', urgency: 'major' },
+];
+
+function renderDashboard() {
+  // Stats
+  const totalItems = state.lanes.flatMap(l => l.tasks).length;
+  const doneItems = state.lanes.flatMap(l => l.tasks).filter(t => t.status === 'done').length;
+  const avgPct = Math.round(state.lanes.reduce((s, l) => s + l.pct, 0) / state.lanes.length);
+  const riskItems = state.lanes.flatMap(l => l.tasks).filter(t => t.status === 'risk').length;
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-card blue"><div class="stat-value">${avgPct}%</div><div class="stat-label">Weighted Completion</div></div>
+    <div class="stat-card green"><div class="stat-value">${doneItems}</div><div class="stat-label">Items Fully Done</div></div>
+    <div class="stat-card yellow"><div class="stat-value">${totalItems}</div><div class="stat-label">Total Action Items</div></div>
+    <div class="stat-card red"><div class="stat-value">${riskItems + RISKS.length}</div><div class="stat-label">Open Risks</div></div>
+  `;
+
+  // Phase timeline
+  document.getElementById('phaseTimeline').innerHTML = `
+    <div class="phase-card complete">
+      <div class="phase-label">Phase 1 · Foundation</div>
+      <div class="phase-title">Build the Base</div>
+      <div class="phase-dates">Apr 14 – May 14, 2026</div>
+      <div class="phase-status complete">✓ Gate Met</div>
+    </div>
+    <div class="phase-card active">
+      <div class="phase-label">Phase 2 · Build & Standardize</div>
+      <div class="phase-title">Execute & Align</div>
+      <div class="phase-dates">May 14 – Jun 14, 2026</div>
+      <div class="phase-status active">⚠ Gate NOT Met</div>
+    </div>
+    <div class="phase-card upcoming">
+      <div class="phase-label">Phase 3 · Execute & Measure</div>
+      <div class="phase-title">Deliver Results</div>
+      <div class="phase-dates">Jun 14 – Jul 14, 2026</div>
+      <div class="phase-status upcoming">○ Pending Decision</div>
+    </div>
+  `;
+
+  // Lane progress
+  document.getElementById('laneProgressList').innerHTML = state.lanes.map(lane => {
+    const pct = lane.pct;
+    const color = pct >= 60 ? 'green' : pct >= 35 ? 'yellow' : 'red';
+    return `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:500">${lane.num} · ${lane.name}</span>
+          <span style="font-size:12px;color:var(--text-muted)">${pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill ${color}" style="width:${pct}%"></div></div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:2px">${lane.owner}</div>
+      </div>`;
+  }).join('');
+
+  // Decisions
+  document.getElementById('dashDecisions').innerHTML = DECISIONS.map(d => `
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">${d.text}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="tag tag-owner">${d.owner}</span>
+        <span class="tag tag-deadline">📅 ${d.deadline}</span>
+        <span class="urgency-badge urgency-${d.urgency}">${d.urgency}</span>
+      </div>
+    </div>
+  `).join('');
+
+  // Risks
+  document.getElementById('dashRisks').innerHTML = RISKS.map(r => `
+    <div class="risk-item ${r.severity === 'major' ? 'major' : ''}">
+      <div class="risk-header">
+        <span class="risk-id">${r.id}</span>
+        <span class="risk-title">${r.title}</span>
+        <span class="urgency-badge urgency-${r.severity}">${r.severity}</span>
+      </div>
+      <div class="risk-meta">${r.context}</div>
+      <div style="margin-top:6px;font-size:12px"><span class="tag tag-owner">${r.owner}</span> <span class="tag tag-deadline">By: ${r.by}</span></div>
+    </div>
+  `).join('');
+}
+
+// ==================== LANES ====================
+
+function getLaneColor(pct) {
+  return pct >= 60 ? 'green' : pct >= 35 ? 'yellow' : 'red';
+}
+
+function renderLanes() {
+  document.getElementById('laneList').innerHTML = state.lanes.map((lane, li) => `
+    <div class="lane-card" id="lc-${lane.id}">
+      <div class="lane-header" onclick="toggleLane('${lane.id}')">
+        <span class="lane-num">Lane ${lane.num}</span>
+        <span class="lane-name">${lane.name}</span>
+        <span class="lane-owner">${lane.owner}</span>
+        <div class="lane-mini-bar progress-bar"><div class="progress-fill ${getLaneColor(lane.pct)}" style="width:${lane.pct}%"></div></div>
+        <span class="lane-pct" style="color:${lane.pct>=60?'var(--green-light)':lane.pct>=35?'var(--accent-light)':'var(--red-light)'}">${lane.pct}%</span>
+        <span class="lane-chevron">▶</span>
+      </div>
+      <div class="lane-body">
+        ${renderTaskList(lane, li)}
+        <div class="add-task-row" style="margin-top:14px">
+          <input placeholder="+ Add task to this lane..." id="newTask-${lane.id}" onkeydown="if(event.key==='Enter')quickAddTask('${lane.id}')">
+          <select id="newTaskOwner-${lane.id}">
+            <option value="">Owner</option>
+            <option>Jac</option><option>Lucas</option><option>Jackie</option>
+            <option>Ben</option><option>Fania</option><option>Brett</option>
+            <option>Mona</option><option>Emily</option><option>Courtney</option>
+          </select>
+          <input type="date" id="newTaskDate-${lane.id}" style="background:var(--surface3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);padding:7px 10px;font-size:13px;outline:none">
+          <button class="btn btn-primary btn-sm" onclick="quickAddTask('${lane.id}')">Add</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTaskList(lane, li) {
+  if (lane.tasks.length === 0) return '<div style="color:var(--text-dim);font-size:13px;padding:8px 0">No tasks yet. Add one below.</div>';
+  return lane.tasks.map((task, ti) => {
+    const statusIcon = task.status === 'done' ? '✓' : task.status === 'progress' ? '▶' : task.status === 'risk' ? '⚠' : '○';
+    return `
+      <div class="task-item" id="task-${task.id}">
+        <div class="task-header">
+          <button class="task-status-btn ${task.status}" onclick="cycleStatus('${lane.id}','${task.id}')" title="Click to cycle status">${statusIcon}</button>
+          <span class="task-title ${task.status==='done'?'done-text':''}">${task.title}</span>
+          <button class="btn btn-ghost btn-sm" onclick="deleteTask('${lane.id}','${task.id}')" style="flex-shrink:0;padding:2px 7px;font-size:11px;color:var(--text-dim)">✕</button>
+        </div>
+        <div class="task-meta">
+          ${task.owner ? `<span class="tag tag-owner">👤 ${task.owner}</span>` : ''}
+          ${task.deadline ? `<span class="tag tag-deadline">📅 ${formatDate(task.deadline)}</span>` : ''}
+          ${task.status==='risk' ? '<span class="tag tag-risk">⚠ At Risk</span>' : ''}
+          ${task.status==='progress' ? '<span class="tag tag-progress">▶ In Progress</span>' : ''}
+          ${task.status==='done' ? '<span class="tag tag-done">✓ Done</span>' : ''}
+          ${task.notes ? `<span style="font-size:11px;color:var(--text-dim);margin-left:4px">${task.notes.substring(0,60)}${task.notes.length>60?'…':''}</span>` : ''}
+        </div>
+        ${task.subtasks && task.subtasks.length > 0 ? `
+          <div class="subtask-list">
+            ${task.subtasks.map((st, si) => `
+              <div class="subtask-item">
+                <div class="subtask-check ${st.done?'done':''}" onclick="toggleSubtask('${lane.id}','${task.id}','${st.id}')">${st.done?'✓':''}</div>
+                <span style="${st.done?'text-decoration:line-through;color:var(--text-dim)':''}">${st.text}</span>
+              </div>
+            `).join('')}
+            <div class="subtask-item" style="border-top:none;padding-top:2px">
+              <input placeholder="+ Add subtask..." id="newSub-${task.id}" onkeydown="if(event.key==='Enter')addSubtask('${lane.id}','${task.id}')" style="background:transparent;border:none;outline:none;color:var(--text-muted);font-size:12px;flex:1;">
+            </div>
+          </div>
+        ` : `
+          <div style="padding-left:28px;margin-top:4px">
+            <input placeholder="+ Add subtask..." id="newSub-${task.id}" onkeydown="if(event.key==='Enter')addSubtask('${lane.id}','${task.id}')" style="background:transparent;border:none;outline:none;color:var(--text-dim);font-size:12px;width:100%;">
+          </div>
+        `}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleLane(laneId) {
+  const card = document.getElementById('lc-' + laneId);
+  card.classList.toggle('open');
+}
+
+function cycleStatus(laneId, taskId) {
+  const lane = state.lanes.find(l => l.id === laneId);
+  const task = lane.tasks.find(t => t.id === taskId);
+  const cycle = ['pending', 'progress', 'done', 'risk'];
+  task.status = cycle[(cycle.indexOf(task.status) + 1) % cycle.length];
+  saveState();
+  renderLanes();
+  // Re-open the lane
+  setTimeout(() => {
+    const card = document.getElementById('lc-' + laneId);
+    if (card) card.classList.add('open');
+  }, 10);
+}
+
+function deleteTask(laneId, taskId) {
+  const lane = state.lanes.find(l => l.id === laneId);
+  lane.tasks = lane.tasks.filter(t => t.id !== taskId);
+  saveState();
+  renderLanes();
+  setTimeout(() => {
+    const card = document.getElementById('lc-' + laneId);
+    if (card) card.classList.add('open');
+  }, 10);
+}
+
+function toggleSubtask(laneId, taskId, subtaskId) {
+  const lane = state.lanes.find(l => l.id === laneId);
+  const task = lane.tasks.find(t => t.id === taskId);
+  const st = task.subtasks.find(s => s.id === subtaskId);
+  st.done = !st.done;
+  saveState();
+  renderLanes();
+  setTimeout(() => {
+    const card = document.getElementById('lc-' + laneId);
+    if (card) card.classList.add('open');
+  }, 10);
+}
+
+function addSubtask(laneId, taskId) {
+  const input = document.getElementById('newSub-' + taskId);
+  if (!input || !input.value.trim()) return;
+  const lane = state.lanes.find(l => l.id === laneId);
+  const task = lane.tasks.find(t => t.id === taskId);
+  task.subtasks.push({ id: 'st-' + Date.now(), text: input.value.trim(), done: false });
+  saveState();
+  renderLanes();
+  setTimeout(() => {
+    const card = document.getElementById('lc-' + laneId);
+    if (card) card.classList.add('open');
+  }, 10);
+}
+
+function quickAddTask(laneId) {
+  const titleEl = document.getElementById('newTask-' + laneId);
+  const ownerEl = document.getElementById('newTaskOwner-' + laneId);
+  const dateEl = document.getElementById('newTaskDate-' + laneId);
+  if (!titleEl || !titleEl.value.trim()) return;
+  const lane = state.lanes.find(l => l.id === laneId);
+  lane.tasks.push({
+    id: 't-' + Date.now(),
+    title: titleEl.value.trim(),
+    status: 'pending',
+    owner: ownerEl ? ownerEl.value : '',
+    deadline: dateEl ? dateEl.value : '',
+    notes: '',
+    subtasks: []
+  });
+  saveState();
+  renderLanes();
+  setTimeout(() => {
+    const card = document.getElementById('lc-' + laneId);
+    if (card) card.classList.add('open');
+  }, 10);
+}
+
+// ==================== ADD TASK MODAL ====================
+
+function openAddTaskModal() {
+  const sel = document.getElementById('taskLane');
+  sel.innerHTML = state.lanes.map(l => `<option value="${l.id}">${l.num} · ${l.name}</option>`).join('');
+  document.getElementById('taskModal').classList.add('open');
+}
+
+function saveTask() {
+  const title = document.getElementById('taskTitle').value.trim();
+  if (!title) return;
+  const laneId = document.getElementById('taskLane').value;
+  const lane = state.lanes.find(l => l.id === laneId);
+  lane.tasks.push({
+    id: 't-' + Date.now(),
+    title,
+    status: document.getElementById('taskStatusSelect').value,
+    owner: document.getElementById('taskOwner').value,
+    deadline: document.getElementById('taskDeadline').value,
+    notes: document.getElementById('taskNotes').value,
+    subtasks: []
+  });
+  saveState();
+  closeModal('taskModal');
+  renderLanes();
+  document.getElementById('taskTitle').value = '';
+  document.getElementById('taskNotes').value = '';
+}
+
+// ==================== MEETINGS ====================
+
+function renderMeetings() {
+  if (state.meetings.length === 0) {
+    document.getElementById('meetingList').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No meetings logged yet. Click "+ Log Meeting" to add one.</p></div>`;
+    return;
+  }
+  document.getElementById('meetingList').innerHTML = [...state.meetings].reverse().map(m => `
+    <div class="meeting-card" id="mc-${m.id}">
+      <div class="meeting-card-header" onclick="toggleMeeting('${m.id}')">
+        <span class="meeting-date">${formatDate(m.date)}</span>
+        <span class="meeting-title">${m.title}</span>
+        <span class="meeting-attendees">${m.attendees}</span>
+        <button onclick="event.stopPropagation();deleteMeeting('${m.id}')" style="background:transparent;border:none;color:var(--text-dim);cursor:pointer;font-size:13px">✕</button>
+      </div>
+      <div class="meeting-body">
+        ${m.summary ? `<div class="meeting-section"><div class="meeting-section-title">Summary</div><p>${m.summary}</p></div>` : ''}
+        ${m.decisions && m.decisions.length > 0 ? `
+          <div class="meeting-section">
+            <div class="meeting-section-title">Decisions</div>
+            ${m.decisions.map(d => `<div class="meeting-ai-item"><div class="ai-dot"></div><span>${d}</span></div>`).join('')}
+          </div>` : ''}
+        ${m.actions && m.actions.length > 0 ? `
+          <div class="meeting-section">
+            <div class="meeting-section-title">Action Items</div>
+            ${m.actions.map(a => `<div class="meeting-ai-item"><div class="ai-dot" style="background:var(--teal-light)"></div><span>${a}</span></div>`).join('')}
+          </div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleMeeting(id) {
+  document.getElementById('mc-' + id).classList.toggle('open');
+}
+
+function deleteMeeting(id) {
+  state.meetings = state.meetings.filter(m => m.id !== id);
+  saveState();
+  renderMeetings();
+}
+
+function openMeetingModal() {
+  document.getElementById('meetingDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('meetingModal').classList.add('open');
+}
+
+function saveMeeting() {
+  const title = document.getElementById('meetingTitle').value.trim();
+  const date = document.getElementById('meetingDate').value;
+  if (!title || !date) return;
+  const decisionsRaw = document.getElementById('meetingDecisions').value;
+  const actionsRaw = document.getElementById('meetingActions').value;
+  state.meetings.push({
+    id: 'm-' + Date.now(),
+    title,
+    date,
+    attendees: document.getElementById('meetingAttendees').value,
+    summary: document.getElementById('meetingSummary').value,
+    decisions: decisionsRaw.split('\n').filter(d => d.trim()),
+    actions: actionsRaw.split('\n').filter(a => a.trim()),
+  });
+  saveState();
+  closeModal('meetingModal');
+  renderMeetings();
+  ['meetingTitle','meetingAttendees','meetingSummary','meetingDecisions','meetingActions'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ==================== CALENDAR ====================
+
+let calDate = new Date();
+
+function renderCalendar() {
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthTitle').textContent = `${monthNames[month]} ${year}`;
+
+  // Collect all deadlines
+  const events = {};
+  state.lanes.forEach(lane => {
+    lane.tasks.forEach(task => {
+      if (task.deadline) {
+        const key = task.deadline; // YYYY-MM-DD
+        if (!events[key]) events[key] = [];
+        const color = task.status === 'done' ? 'green' : task.status === 'risk' ? 'red' : task.status === 'progress' ? 'yellow' : 'teal';
+        events[key].push({ label: task.title.substring(0, 22), color, owner: task.owner });
+      }
+    });
+  });
+
+  // Also add meeting dates
+  state.meetings.forEach(m => {
+    if (m.date) {
+      if (!events[m.date]) events[m.date] = [];
+      events[m.date].push({ label: '📋 ' + m.title.substring(0, 18), color: 'teal' });
+    }
+  });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  let html = '<div class="cal-header">Sun</div><div class="cal-header">Mon</div><div class="cal-header">Tue</div><div class="cal-header">Wed</div><div class="cal-header">Thu</div><div class="cal-header">Fri</div><div class="cal-header">Sat</div>';
+
+  // Prev month trailing days
+  const prevDays = new Date(year, month, 0).getDate();
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="cal-cell other-month"><div class="cal-day">${prevDays - i}</div></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateKey === todayKey;
+    const dayEvents = events[dateKey] || [];
+    html += `<div class="cal-cell ${isToday ? 'today' : ''}">
+      <div class="cal-day">${d}</div>
+      ${dayEvents.map(e => `<div class="cal-event ${e.color}" title="${e.label}">${e.label}</div>`).join('')}
+    </div>`;
+  }
+
+  // Next month
+  const totalCells = firstDay + daysInMonth;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let d = 1; d <= remaining; d++) {
+    html += `<div class="cal-cell other-month"><div class="cal-day">${d}</div></div>`;
+  }
+
+  document.getElementById('calendarGrid').innerHTML = html;
+}
+
+function calNav(dir) {
+  calDate = new Date(calDate.getFullYear(), calDate.getMonth() + dir, 1);
+  renderCalendar();
+}
+
+function calGoToday() {
+  calDate = new Date();
+  renderCalendar();
+}
+
+// ==================== CHAT ====================
+
+function renderChat() {
+  renderChannels();
+  renderMessages();
+}
+
+function renderChannels() {
+  document.getElementById('channelList').innerHTML = state.channels.map(ch => `
+    <div class="channel-item ${ch.id === state.activeChannel ? 'active' : ''}" onclick="switchChannel('${ch.id}')">
+      <span class="channel-hash">#</span> ${ch.name}
+    </div>
+  `).join('');
+  const active = state.channels.find(c => c.id === state.activeChannel);
+  if (active) {
+    document.getElementById('activeChannelName').textContent = active.name;
+    const input = document.getElementById('chatInput');
+    if (input) input.placeholder = `Message #${active.name}...`;
+  }
+}
+
+function renderMessages() {
+  const msgs = state.messages[state.activeChannel] || [];
+  document.getElementById('chatMessages').innerHTML = msgs.length === 0
+    ? '<div class="empty-state"><div class="empty-icon">💬</div><p>No messages yet. Start the conversation!</p></div>'
+    : msgs.map(m => `
+        <div class="chat-message">
+          <div class="chat-avatar">${m.sender.charAt(0).toUpperCase()}</div>
+          <div class="chat-msg-content">
+            <div class="chat-msg-header">
+              <span class="chat-msg-name">${m.sender}</span>
+              <span class="chat-msg-time">${m.time}</span>
+            </div>
+            <div class="chat-msg-text">${m.text}</div>
+          </div>
+        </div>
+      `).join('');
+  const chatMsgs = document.getElementById('chatMessages');
+  if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
+}
+
+function switchChannel(id) {
+  state.activeChannel = id;
+  saveState();
+  renderChat();
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter') sendChat();
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  if (!input || !input.value.trim()) return;
+  if (!state.messages[state.activeChannel]) state.messages[state.activeChannel] = [];
+  const now = new Date();
+  state.messages[state.activeChannel].push({
+    id: 'msg-' + Date.now(),
+    sender: state.chatUser,
+    text: input.value.trim(),
+    time: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+  });
+  input.value = '';
+  saveState();
+  renderMessages();
+}
+
+function addChannel() {
+  const name = prompt('Channel name (no spaces, use hyphens):');
+  if (!name || !name.trim()) return;
+  const id = 'ch-' + name.trim().toLowerCase().replace(/\s+/g,'-');
+  if (state.channels.find(c => c.id === id)) return;
+  state.channels.push({ id, name: name.trim().toLowerCase() });
+  state.messages[id] = [];
+  state.activeChannel = id;
+  saveState();
+  renderChat();
+}
+
+// ==================== MODALS ====================
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+// ==================== UTILS ====================
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+}
+
+// ==================== INIT ====================
+
+loadState();
+renderDashboard();
+</script>
+</body>
+</html>
